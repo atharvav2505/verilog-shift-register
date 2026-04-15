@@ -1,0 +1,65 @@
+// Code your testbench here
+module shift_register_tb;
+
+reg clk, reset;
+reg mode, dir;
+reg serial_in;
+reg [3:0] parallel_in;
+
+wire [3:0] parallel_out;
+wire serial_out;
+
+shift_register uut (
+    .clk(clk),
+    .reset(reset),
+    .mode(mode),
+    .dir(dir),
+    .serial_in(serial_in),
+    .parallel_in(parallel_in),
+    .parallel_out(parallel_out),
+    .serial_out(serial_out)
+);
+
+// 🔹 Clock generation
+always #5 clk = ~clk;
+
+// 🔹 Display output every clock
+always @(posedge clk) begin
+    $display("Time=%0t | mode=%b dir=%b serial_in=%b parallel_out=%b serial_out=%b",
+              $time, mode, dir, serial_in, parallel_out, serial_out);
+end
+
+initial begin
+    $display("TIME | mode dir serial_in parallel_out serial_out");
+
+    // Initialize
+    clk = 0;
+    reset = 1;
+    #10 reset = 0;
+
+    // 🔷 1. SIPO (Shift Right)
+    mode = 0; dir = 0;
+    serial_in = 1; #10;
+    serial_in = 0; #10;
+    serial_in = 1; #10;
+    serial_in = 1; #10;
+
+    // 🔷 2. SIPO (Shift Left)
+    dir = 1;
+    serial_in = 0; #10;
+    serial_in = 1; #10;
+
+    // 🔷 3. PISO (Shift Right)
+    mode = 1; dir = 0;
+    parallel_in = 4'b1011;
+    #40;
+
+    // 🔷 4. PISO (Shift Left)
+    dir = 1;
+    parallel_in = 4'b1101;
+    #40;
+
+    $finish;
+end
+
+endmodule
